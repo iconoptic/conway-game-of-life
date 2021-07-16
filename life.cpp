@@ -22,6 +22,13 @@ bool** genGrid (int rows, int cols)
 	return grid;
 }
 
+void delGrid(bool** grid, int rows)
+{
+		for (int i = 0; i < rows; i++) delete [] grid[i];
+		delete [] grid;
+		grid = 0;
+}
+
 bool** stepGrid (bool** grid, int rows, int cols)
 {
 		bool **newGrid;
@@ -64,17 +71,19 @@ bool** stepGrid (bool** grid, int rows, int cols)
 						//printf("[%d,%d]: %d\n", i, j, lN);
 				}
 		}
+		delGrid(grid, rows);
 		return newGrid;
 }
 
 void printGrid (bool** grid, int rows, int cols)
 {
-	clear();
+	erase();
 	for (int i = 0; i < rows; i++)
 	{
 			for (int j = 0; j < cols; j++)
 			{
-					grid[i][j] ? printw("0") : printw(" ");// printw("■") : printw(" ");
+					if (grid[i][j]) mvprintw(i, j, "0");
+					//grid[i][j] ? printw("0") : printw(" ");// printw("■") : printw(" ");
 			}
 			//printw("\n");
 	}
@@ -113,38 +122,41 @@ int main (int argc, char **argv)
     struct winsize w;
     ioctl(STDOUT_FILENO, TIOCGWINSZ, &w);
 
-	int rows = w.ws_row-1, cols = w.ws_col;
+	int rows = w.ws_row, cols = w.ws_col;
 	int generation = 0;
     bool** lastGrid, **llGrid, **lllGrid, **llllGrid, **curGrid = genGrid(rows, cols);
 
-	initscr();
+	WINDOW *win = initscr();
+	idlok(win, true);
 	printGrid(curGrid, rows, cols);
 
 	while (1)
 	{
 			if (generation > 3) 
 			{
-					if (generation > 5) llllGrid = gridCp(lllGrid,rows,cols);
-					if (generation > 4) lllGrid = gridCp(llGrid,rows,cols);
+					//if (generation > 5) llllGrid = gridCp(lllGrid,rows,cols);
+					if (generation > 4) delGrid(llGrid, rows);
 					llGrid = gridCp(lastGrid,rows,cols);
+					delGrid(lastGrid, rows);
 			}
 			lastGrid = gridCp(curGrid,rows,cols);
 			curGrid = stepGrid(curGrid, rows, cols);
 			generation ++;
 			printGrid(curGrid, rows, cols);
 			if (sameGrid(lastGrid, curGrid, rows, cols)) {
+					delGrid(curGrid, rows);
 					curGrid = genGrid(rows, cols);
 					generation = 0;
 			}
 			else if (generation > 10) 
 			{
-
 					if (sameGrid(llGrid,curGrid, rows, cols))
 					{
+							delGrid(curGrid, rows);
 							curGrid = genGrid(rows, cols);
 							generation = 0;
 					}
-					if (sameGrid(lllGrid, curGrid, rows, cols))
+					/*if (sameGrid(lllGrid, curGrid, rows, cols))
 					{
 							curGrid = genGrid(rows,cols);
 							generation = 0;
@@ -153,7 +165,7 @@ int main (int argc, char **argv)
 					{
 							curGrid = genGrid(rows,cols);
 							generation = 0;
-					}
+					}*/
 			}
 			else usleep(50000);
 	}
