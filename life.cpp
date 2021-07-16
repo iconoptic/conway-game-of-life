@@ -15,11 +15,39 @@ bool** genGrid (int rows, int cols)
 			grid[i] = new bool[cols];
 			for (int j = 0; j < cols; j++)
 			{
-					if ( rand() % 100 < 94 ) grid[i][j] = false;
+					if ( rand() % 100 < 25 ) grid[i][j] = false;
 					else grid[i][j] = true;
 			}
 	}
 	return grid;
+}
+
+bool** genGridGliderGun (int rows, int cols)
+{
+		bool **grid = 0;
+		grid = new bool*[rows];
+		bool gL[rows][cols] = {
+				{false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true},
+				{false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,false,true,false,true},
+				{false,false,false,false,false,false,false,false,false,false,false,false,true,true,false,false,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,true,true},
+				{false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,true,false,false,false,false,true,true,false,false,false,false,false,false,false,false,false,false,false,false,true,true},
+				{true,true,false,false,false,false,false,false,false,false,true,false,false,false,false,false,true,false,false,false,true,true},
+				{true,true,false,false,false,false,false,false,false,false,true,false,false,false,true,false,true,true,false,false,false,false,true,false,true},
+				{false,false,false,false,false,false,false,false,false,false,true,false,false,false,false,false,true,false,false,false,false,false,false,false,true},
+				{false,false,false,false,false,false,false,false,false,false,false,true,false,false,false,true},
+				{false,false,false,false,false,false,false,false,false,false,false,false,true,true},
+		};
+		for (int i = 0; i < rows; i++) 
+		{
+				grid[i] = new bool[cols];
+				for (int j = 0; j < cols; j++)
+				{
+						if (gL[i][j]) grid[i][j] = true;
+						else grid[i][j] = false;
+				}
+
+		}
+		return grid;
 }
 
 void delGrid(bool** grid, int rows)
@@ -59,7 +87,7 @@ bool** stepGrid (bool** grid, int rows, int cols)
 						//Determine state of this cell
 						if (grid[i][j]) 
 						{
-								if (lN < 2 || lN < 3) newGrid[i][j] = false;
+								if (lN < 2 || lN > 3) newGrid[i][j] = false;
 								else newGrid[i][j] = true;
 						}
 						else
@@ -68,7 +96,7 @@ bool** stepGrid (bool** grid, int rows, int cols)
 								else newGrid[i][j] = false;
 						}
 
-						//printf("[%d,%d]: %d\n", i, j, lN);
+						//printw("[%d,%d]: %d\n", i, j, lN);
 				}
 		}
 		delGrid(grid, rows);
@@ -134,8 +162,12 @@ int main (int argc, char **argv)
 	{
 			if (generation > 3) 
 			{
-					//if (generation > 5) llllGrid = gridCp(lllGrid,rows,cols);
-					if (generation > 4) delGrid(llGrid, rows);
+					if (generation > 5) delGrid(lllGrid, rows);// llllGrid = gridCp(lllGrid,rows,cols);
+					if (generation > 4)
+					{
+							lllGrid = gridCp(curGrid, rows, cols);
+							delGrid(llGrid, rows);
+					}
 					llGrid = gridCp(lastGrid,rows,cols);
 					delGrid(lastGrid, rows);
 			}
@@ -156,18 +188,20 @@ int main (int argc, char **argv)
 							curGrid = genGrid(rows, cols);
 							generation = 0;
 					}
-					/*if (sameGrid(lllGrid, curGrid, rows, cols))
+					if (sameGrid(lllGrid, curGrid, rows, cols))
 					{
+							delGrid(curGrid, rows);
 							curGrid = genGrid(rows,cols);
 							generation = 0;
 					}
-					if (sameGrid(llllGrid, curGrid, rows, cols))
+					/*if (sameGrid(llllGrid, curGrid, rows, cols))
 					{
 							curGrid = genGrid(rows,cols);
 							generation = 0;
 					}*/
 			}
-			else usleep(50000);
+			//sleep(1);
+			//usleep(10000);
 	}
 	
 	return 0;  // make sure your main returns int
